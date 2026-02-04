@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ANH — URL Inspector and Heuristic SEO Analyst</title>
+
+  <!-- Prism.js (CDN) for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <link rel="stylesheet" href="/URL-Inspector-SEO-Analyst/style.css">
+</head>
+<body>
+  <div class="app" role="application" aria-label="ANH URL Inspector">
+    <header>
+      <h1>ANH — URL Inspector & Heuristic SEO Analyst</h1>
+      <div class="meta">Privacy-first • Single-file • No tracking</div>
+    </header>
+
+    <section class="controls" aria-label="Controls">
+      <div class="inputs">
+        <div class="fields-row">
+          <div style="flex:1">
+            <label for="url1">URL 1 (required)</label>
+            <input id="url1" type="text" placeholder="https://akshat-881236.github.io/..." autocomplete="off" />
+          </div>
+          <div style="flex:1">
+            <label for="url2">URL 2 (optional — comparison)</label>
+            <input id="url2" type="text" placeholder="https://akshat-881236.github.io/..." autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="fields-row" style="align-items:center">
+          <div style="flex:1">
+            <label for="quick">ANH Quick Select</label>
+            <select id="quick" aria-label="ANH Quick Select">
+              <option value="">-- pick a project --</option>
+              <option value="https://akshat-881236.github.io/AkshatNetworkHub/">Akshat Network Hub</option>
+              <option value="https://akshat-881236.github.io/Portfolio-881236/">Portfolio</option>
+              <option value="https://akshat-881236.github.io/Quizzone/">Quizzone</option>
+              <option value="https://akshat-881236.github.io/Quizzone/Home/QuizzoneAI.htm">Quizzone AI</option>
+              <option value="https://akshat-881236.github.io/Quizzone/Home/Dashboard.htm">Quizzone Dashboard</option>
+              <option value="https://akshat-881236.github.io/LocalRepo/">Akshat Dashboard</option>
+              <option value="https://akshat-881236.github.io/SitemapGeneratorXml/">Sitemap Generator</option>
+              <option value="https://akshat-881236.github.io/DPGStudent-881238/">DPG STM Blog</option>
+              <option value="https://akshat-881236.github.io/sitemapjs/">Akshat Journal</option>
+              <option value="https://akshat-881236.github.io/Key-of-Success/">Fee Portal for Coaching Centre</option>
+              <option value="https://akshat-881236.github.io/Key-of-Success/DMC.htm">DMC Generator for Coaching Centre</option>
+              <option value="https://akshat-881236.github.io/Key-of-Success/AttendanceMGMT.htm">Attendance Portal for Coaching Centre</option>
+              <option value="https://akshat-881236.github.io/DPGStudent-881238/Assignment_Frontpage_DPG_STM_Akshat_Network_Hub.htm">DPG STM Assignment Frontpage Generator</option>
+              <option value="https://akshat-881236.github.io/DPGStudent-881238/Practical_Frontpage_DPG_STM_Akshat_Network_Hub.htm">DPG STM Practical Frontpage Generator</option>
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="runBtn" title="Run inspection (Enter)">Run / Inspect</button>
+            <button id="clearBtn" class="btn-ghost" title="Clear outputs">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:6px">Device Preview</div>
+        <div class="device-toggle" role="toolbar" aria-label="Device toggle">
+          <button class="device-btn active" data-device="mobile" title="Mobile (375×667)">Mobile</button>
+          <button class="device-btn" data-device="tablet" title="Tablet (768×1024)">Tablet</button>
+          <button class="device-btn" data-device="laptop" title="Laptop (1366×768)">Laptop</button>
+          <button class="device-btn" data-device="desktop" title="Desktop (100%)">Desktop</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="feedback" class="error" role="status" aria-live="polite"></div>
+
+    <main class="main">
+      <div class="panels">
+        <div class="panel" style="transform: skewY(-0.8deg)">
+          <div class="tabs" role="tablist" aria-label="Main tabs">
+            <button class="tab active" data-tab="iframe" role="tab" aria-selected="true">Iframe View</button>
+            <button class="tab" data-tab="source" role="tab" aria-selected="false">Source Code</button>
+            <button class="tab" data-tab="seo" role="tab" aria-selected="false">SEO Report</button>
+          </div>
+
+          <div id="iframePanel" class="panel-body" data-panel="iframe">
+            <div class="iframe-area" id="iframeArea">
+              <div class="iframe-card">
+                <div class="iframe-title">No inspection yet. Use Run / Inspect to start.</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="sourcePanel" class="panel-body" data-panel="source" hidden>
+            <div class="code-header">
+              <div style="color:var(--muted)">Fetched HTML source (read-only). Highlighted with Prism.</div>
+              <div style="display:flex;gap:8px">
+                <button id="copySource" class="btn-ghost" title="Copy source to clipboard">Copy Source</button>
+                <button id="reflow" class="btn-ghost" title="Re-run syntax highlight">Refresh Highlight</button>
+              </div>
+            </div>
+            <div id="sourceArea" style="min-height:120px;color:var(--muted)">No source loaded yet.</div>
+          </div>
+
+          <div id="seoPanel" class="panel-body" data-panel="seo" hidden>
+            <div id="seoArea" style="min-height:160px;color:var(--muted)">No SEO analysis yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="aside" aria-label="Right column">
+        <div class="panel">
+          <div style="font-weight:700;margin-bottom:6px">Inspection Details</div>
+          <div id="details" class="details">Awaiting run.</div>
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:700;margin-bottom:6px">Heuristic SEO Notes</div>
+          <div style="color:var(--muted);font-size:13px">
+            Scores are heuristic (out of 20). This is a client-side heuristic inspector that checks common SEO markers.
+            The app prioritizes privacy — it only allows ANH domain URLs and doesn't store or send data anywhere.
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:700;margin-bottom:6px">Legend</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(180deg,#03260d,#042a0f);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="color:var(--muted)">Present (2 pts)</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(180deg,#2a0b09,#3b0f0d);display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="color:var(--muted)">Missing (0 pts) — suggestion shown</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+        Built for ANH • No data stored • Only inspects URLs that begin with https://akshat-881236.github.io/ <br>
+    <pre><p><a href="/URL-Inspector-SEO-Analyst/index.htm" target="_blank" referrerpolicy="referrer"><span>Go Back To Home </span></a>          <a href="https://akshat-881236.github.io/Portfolio-881236/feedback.htm?title=ANH%20—%20URL%20Inspector%20and%20Heuristic%20SEO%20Analyst&description=Analyze%20Akshat%20Network%20Hub%20pages%20using%20URL%20Inspector%20with%20iframe%20preview%2C%20source%20code%20viewer%2C%20and%20SEO%20metadata%20analysis.%20Frontend-only%2C%20privacy-first%20tool.&url=https://akshat-881236.github.io/URL-Inspector-SEO-Analyst/AdvanceInspectionTool.htm" target="_blank" referrerpolicy="referrer"><span>Give feedback and Suggestion </span></a></p></pre>
+    </footer>
+  </div>
+  <script src="/URL-Inspector-SEO-Analyst/script.js" defer></script>
+</body>
+</html>
