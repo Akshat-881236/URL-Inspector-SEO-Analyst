@@ -78,7 +78,7 @@
     .preview-frame{width:200%;border:0;border-radius:8px;background:white;height:700px}
 
     /* Source */
-    pre.code{max-height:380px;overflow:auto;border-radius:10px;padding:12px;background:#041019;border:1px solid var(--border)}
+    pre.code{max-height:380px;max-width: 650px; border-radius:10px; padding:12px;background:#041019;border:1px solid var(--border)}
     .code-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted)}
 
     /* SEO area */
