@@ -2,6 +2,7 @@
   'use strict';
 
   // --- CONFIG ---
+  const ALLOWED_PREFIX = '';
   const MAX_SCORE = 50; // Maximum marks
 
   // Notes / help content shown when a factor is missing
@@ -86,7 +87,7 @@
 
 try {
   const ref = document.referrer || '';
-  if (ref) {
+  if (ref && ref.startsWith(ALLOWED_PREFIX)) {
     // Only auto-fill if user hasn't already supplied ?url
     const params = new URLSearchParams(location.search);
     if (!params.has('url')) {
@@ -160,6 +161,8 @@ try {
     url = url.trim();
     if (!(url.startsWith('http://') || url.startsWith('https://')))
       return { ok: false, reason: 'URL must start with https:// or http://' };
+    if (!url.startsWith(ALLOWED_PREFIX))
+      return { ok: false, reason: `Only ANH URLs allowed (must start with ${ALLOWED_PREFIX}). To inspect other domain Github Pages use <a href="https://akshat-881236.github.io/URL-Inspector-SEO-Analyst/GlobalGithubPagesAdvanceSEOInspectionTool.htm" target="_blank" rel="noopener" style="color:var(--accent)">All Github Pages Advance Inspection tool</a>` };
     try {
       new URL(url);
     } catch (e) {
