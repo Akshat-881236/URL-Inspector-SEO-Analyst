@@ -162,7 +162,7 @@ try {
     if (!(url.startsWith('http://') || url.startsWith('https://')))
       return { ok: false, reason: 'URL must start with https:// or http://' };
     if (!url.startsWith(ALLOWED_PREFIX))
-      return { ok: false, reason: `Only ANH URLs allowed (must start with ${ALLOWED_PREFIX}). To inspect other domain Github Pages use <a href="https://akshat-881236.github.io/URL-Inspector-SEO-Analyst/GlobalGithubPagesAdvanceSEOInspectionTool.htm" target="_blank" rel="noopener" style="color:var(--accent)">All Github Pages Advance Inspection tool</a>` };
+      return { ok: false, reason: `Only ANH URLs allowed (must start with ${ALLOWED_PREFIX}).` };
     try {
       new URL(url);
     } catch (e) {
