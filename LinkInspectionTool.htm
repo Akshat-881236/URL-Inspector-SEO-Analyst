@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub</title>
+<meta name="description" content="Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="canonical" href="https://akshat-881236.github.io/link-inspection-tool/">
+
+<meta property="og:title" content="Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub">
+<meta property="og:description" content="Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub">
+<meta property="og:type" content="website">
+
+<meta name="twitter:title" content="Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub">
+<meta name="twitter:description" content="Link Inspection and Crawler Tool | Get Your Site Link Status in Few Seconds By Akshat Network Hub">
+
+<style>
+:root{
+  --bg:#020617;
+  --panel:#0b1220;
+  --border:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#38bdf8;
+  --green:#10b981;
+  --orange:#fb923c;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+nav{
+  padding:.75rem 1rem;
+  border-bottom:1px solid var(--border);
+  background:#020617;
+  display:flex;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+nav a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:600;
+}
+
+main{
+  max-width:1600px;
+  margin:auto;
+  padding:1rem;
+}
+
+h1{font-size:1.8rem}
+h2{margin-top:1.2rem;font-size:1.3rem}
+p{color:var(--muted)}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:.75rem;
+  padding:1rem;
+  margin-top:1rem;
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:.75rem;
+}
+
+input,select,button{
+  background:#020617;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:.65rem;
+  border-radius:.45rem;
+  width:100%;
+}
+
+button{
+  background:var(--accent);
+  color:#020617;
+  font-weight:700;
+}
+
+.status{
+  margin-top:.5rem;
+  font-weight:600;
+  color:var(--accent);
+}
+
+/* ================= TABLE / CARD HYBRID ================= */
+
+.table-wrap{
+  margin-top:1rem;
+}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+}
+
+thead{display:none}
+
+tr{
+  border:1px solid var(--border);
+  border-radius:.75rem;
+  display:block;
+  margin-bottom:.75rem;
+  background:#050b1a;
+  padding:.75rem;
+}
+
+td{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:.5rem;
+  padding:.35rem 0;
+  border:none;
+  word-break:break-all;
+}
+
+td::before{
+  content:attr(data-label);
+  font-weight:700;
+  color:var(--accent);
+  flex:0 0 90px;
+}
+
+.badge{
+  padding:.2rem .45rem;
+  border-radius:.3rem;
+  font-size:.7rem;
+  font-weight:700;
+}
+
+.internal{background:#064e3b;color:#6ee7b7}
+.external{background:#7c2d12;color:#fdba74}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+}
+
+.actions button{
+  font-size:.7rem;
+  padding:.35rem .5rem;
+  background:#0ea5e9;
+}
+
+.snapshots{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:.5rem;
+  margin-top:.5rem;
+}
+
+.snapshots img{
+  width:100%;
+  border-radius:.5rem;
+  border:1px solid var(--border);
+}
+
+iframe{display:none}
+
+/* ================= DESKTOP ================= */
+@media(min-width:900px){
+  .controls{
+    grid-template-columns:2fr 1fr 1fr;
+  }
+
+  table{
+    border-spacing:0;
+  }
+
+  thead{
+    display:table-header-group;
+  }
+
+  tr{
+    display:table-row;
+    padding:0;
+    border-radius:0;
+  }
+
+  td,th{
+    display:table-cell;
+    padding:.6rem;
+    border-bottom:1px solid var(--border);
+  }
+
+  td::before{display:none}
+
+  thead th{
+    background:#020617;
+    color:var(--accent);
+    border-bottom:2px solid var(--border);
+    text-align:left;
+  }
+}
+</style>
+</head>
+
+<body>
+<nav>
+  <a href="#tool">Tool</a>
+  <a href="#results">Results</a>
+  <a href="#manual">Manual</a>
+</nav>
+
+<main>
+<section id="tool">
+  <h1>Link Inspection and Crawler Tool</h1>
+  <p>Mobile-first GitHub Pages crawler with snapshots and safe source inspection.</p>
+
+  <div class="card">
+    <div class="controls">
+      <input type="url" id="urlInput" placeholder="https://akshat-881236.github.io/">
+      <select id="depth">
+        <option value="1">Level 1</option>
+        <option value="3">Level 3</option>
+        <option value="6" selected>Level 6</option>
+      </select>
+      <button id="start">Proceed</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</section>
+
+<section id="results" class="card">
+  <h2>Crawled Links</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Type</th>
+          <th>Repository</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="manual" class="card">
+  <h2>Site Manual</h2>
+  <p><strong>Visit</strong> – Open link in new tab</p>
+  <p><strong>View</strong> – Capture 4 snapshots over 12 seconds</p>
+  <p><strong>Copy</strong> – Copy normalized URL</p>
+  <p><strong>View Source</strong> – Safe edit & preview (no live impact)</p>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const start=document.getElementById("start");
+const rows=document.getElementById("rows");
+const status=document.getElementById("status");
+const visited=new Set(),data=new Map();
+
+const norm=(u,b)=>{try{return new URL(u,b).href}catch{return null}};
+const isGH=u=>u.includes(".github.io");
+const repo=u=>{try{return new URL(u).pathname.split("/")[1]||"/"}catch{return"-"}};
+
+async function crawl(url,d,max,origin){
+  if(visited.has(url)||d>max)return;
+  visited.add(url);
+  status.textContent="Processing your URL : "+url;
+  let html="";
+  try{html=await (await fetch(url)).text()}catch{return}
+  const doc=new DOMParser().parseFromString(html,"text/html");
+  for(const a of doc.querySelectorAll("a[href]")){
+    const full=norm(a.getAttribute("href"),url);
+    if(!full||!full.startsWith(origin))continue;
+    if(!data.has(full))data.set(full,{url:full,type:isGH(full)?"Internal":"External",repo:repo(full)});
+    if(isGH(full))await crawl(full,d+1,max,origin);
+  }
+}
+
+async function snapshot(url,box){
+  const f=document.createElement("iframe");
+  f.src=url;
+  f.onload=async()=>{
+    for(let i=0;i<4;i++){
+      try{
+        const c=await html2canvas(f.contentDocument.body);
+        const img=document.createElement("img");
+        img.src=c.toDataURL();
+        box.appendChild(img);
+      }catch{}
+      await new Promise(r=>setTimeout(r,3000));
+    }
+    f.remove();
+  };
+  document.body.appendChild(f);
+}
+
+function render(){
+  rows.innerHTML="";
+  [...data.values()].sort((a,b)=>a.repo.localeCompare(b.repo)).forEach(i=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td data-label="URL">${i.url}</td>
+      <td data-label="Type"><span class="badge ${i.type==="Internal"?"internal":"external"}">${i.type}</span></td>
+      <td data-label="Repo">${i.repo}</td>
+      <td data-label="Actions">
+        <div class="actions">
+          <button onclick="window.open('${i.url}','_blank')">Visit</button>
+          <button data-view>View</button>
+          <button onclick="navigator.clipboard.writeText('${i.url}')">Copy</button>
+          <button data-src>View Source</button>
+        </div>
+      </td>`;
+    tr.querySelector("[data-view]").onclick=()=>{
+      const r=document.createElement("tr");
+      const c=document.createElement("td");
+      c.colSpan=4;
+      const box=document.createElement("div");
+      box.className="snapshots";
+      c.appendChild(box);r.appendChild(c);tr.after(r);
+      snapshot(i.url,box);
+    };
+    tr.querySelector("[data-src]").onclick=async()=>{
+      const w=window.open();
+      const h=await fetch(i.url).then(r=>r.text());
+      w.document.write(`<textarea style="width:100%;height:40%">${h.replace(/</g,"&lt;")}</textarea>
+      <iframe style="width:100%;height:55%"></iframe>
+      <script>
+        const t=document.querySelector('textarea'),i=document.querySelector('iframe');
+        t.oninput=()=>i.srcdoc=t.value;
+      <\/script>`);
+    };
+    rows.appendChild(tr);
+  });
+}
+
+start.onclick=async()=>{
+  const url=document.getElementById("urlInput").value.trim();
+  if(!url)return;
+  start.disabled=true;
+  rows.innerHTML="";visited.clear();data.clear();
+  await crawl(url,0,Number(document.getElementById("depth").value),new URL(url).origin);
+  render();
+  status.textContent="Crawling completed successfully ✔️";
+  start.disabled=false;
+};
+</script>
+</body>
+</html>
