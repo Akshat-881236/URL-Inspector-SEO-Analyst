@@ -101,6 +101,11 @@ button{
   margin-top:1rem;
 }
 
+  .iframe-row td {
+  padding: 0.75rem;
+  background: #020617;
+  }
+
 table{
   width:100%;
   border-collapse:separate;
@@ -288,25 +293,7 @@ async function crawl(url,d,max,origin){
     if(isGH(full))await crawl(full,d+1,max,origin);
   }
 }
-
-async function snapshot(url,box){
-  const f=document.createElement("iframe");
-  f.src=url;
-  f.onload=async()=>{
-    for(let i=0;i<4;i++){
-      try{
-        const c=await html2canvas(f.contentDocument.body);
-        const img=document.createElement("img");
-        img.src=c.toDataURL();
-        box.appendChild(img);
-      }catch{}
-      await new Promise(r=>setTimeout(r,3000));
-    }
-    f.remove();
-  };
-  document.body.appendChild(f);
-}
-
+  
 function render(){
   rows.innerHTML="";
   [...data.values()].sort((a,b)=>a.repo.localeCompare(b.repo)).forEach(i=>{
@@ -323,15 +310,28 @@ function render(){
           <button data-src>View Source</button>
         </div>
       </td>`;
-    tr.querySelector("[data-view]").onclick=()=>{
-      const r=document.createElement("tr");
-      const c=document.createElement("td");
-      c.colSpan=4;
-      const box=document.createElement("div");
-      box.className="snapshots";
-      c.appendChild(box);r.appendChild(c);tr.after(r);
-      snapshot(i.url,box);
-    };
+    tr.querySelector("[data-view]").onclick = () => {
+  // prevent duplicate iframe rows
+  if (tr.nextSibling && tr.nextSibling.classList.contains("iframe-row")) return;
+
+  const r = document.createElement("tr");
+  r.className = "iframe-row";
+
+  const c = document.createElement("td");
+  c.colSpan = 4;
+
+  const iframe = document.createElement("iframe");
+  iframe.src = i.url;
+  iframe.style.width = "100%";
+  iframe.style.height = "70vh";
+  iframe.style.border = "1px solid var(--border)";
+  iframe.style.borderRadius = "8px";
+  iframe.loading = "lazy";
+
+  c.appendChild(iframe);
+  r.appendChild(c);
+  tr.after(r);
+};
     tr.querySelector("[data-src]").onclick=async()=>{
       const w=window.open();
       const h=await fetch(i.url).then(r=>r.text());
