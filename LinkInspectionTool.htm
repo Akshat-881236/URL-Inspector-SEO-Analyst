@@ -213,6 +213,38 @@ iframe{display:none}
     text-align:left;
   }
 }
+
+.tool {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:.75rem;
+  padding:1rem;
+  margin-top:1rem;
+}
+
+.tool h2 {
+  margin-top:0;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: var(--accent);
+}
+
+.tool p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.tool ol {
+  margin-left: 1.5rem;
+  color: var(--muted);
+  margin-left: 1.5rem;
+  padding-left: 0.5rem;
+}
+
+.tool ol li {
+  margin-bottom: 0.75rem;
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
 </style>
 </head>
 <body>
@@ -227,7 +259,27 @@ iframe{display:none}
 <section id="tool">
   <h1>Link Inspection and Crawler Tool</h1>
   <p>Mobile-first GitHub Pages crawler with snapshots and safe source inspection.</p>
+  
+  <h2>How It Works</h2>
+  <p>Enter a GitHub Pages URL and select crawl depth. The tool fetches the page, extracts links, and classifies them as internal (same GitHub Pages domain) or external. It recursively crawls internal links up to the specified depth. Results are displayed in a table with actions for each link.</p>
+  <p><strong>Working Algorithm -</strong></p>
+  <ol>
+    <li><strong>Input URL:</strong> User enters a GitHub Pages URL and selects crawl depth.</li>
+    <li><strong>Fetch & Parse:</strong> The tool fetches the HTML content of the URL and parses it to extract all anchor tags.</li>
+    <li><strong>Normalize Links:</strong> Each extracted link is normalized to an absolute URL based on the base URL.</li>
+    <li><strong>Classify Links:</strong> Links are classified as internal (same GitHub Pages domain) or external (different domain).</li>
+    <li><strong>Recursive Crawling:</strong> Internal links are recursively crawled up to the specified depth, repeating steps 2-4 for each new page.</li>
+    <li><strong>Data Storage:</strong> All unique links are stored in a data structure with their URL, type, and associated repository.</li>
+    <li><strong>Render Results:</strong> The collected data is rendered in a table format with action buttons for visiting, previewing, or copying each link.</li>
+  </ol>
+  <p><strong>Note:</strong> Always exercise caution when visiting external links. Use the preview feature to get a snapshot of the site before visiting. If the preview fails, it may indicate that the site blocks iframes or has CORS restrictions, so it's safer to open it in a new tab for manual inspection.</p>
 
+  <h3>Disclaimer</h3>
+  <p>This tool is provided for educational purposes only. The creators are not responsible for any misuse or damage caused by using this tool. Always exercise caution when visiting external links. This tool does not guarantee the safety of any links. Use it at your own risk.</p>
+  <p>Also this project is open-source and free to use. If you find it useful, consider starring the repository on GitHub to support further development.</p>
+
+  <h3>About the Creator -</h3>
+  <p>Hey there! I'm <a href="https://akshat-881236.github.io/LocalRepo/" target="_blank" rel="noopener noreferrer">Akshat Prasad</a>, a passionate web developer and open-source enthusiast. I created this Link Inspection and Crawler Tool to help users quickly analyze my GitHub Pages sites and understand my projects link structure. With a focus on simplicity and efficiency, this tool is designed to provide valuable insights while being easy to use. If you have any feedback or suggestions for improvement, feel free to reach out or contribute to the project on GitHub!</p>
   <div class="card">
     <div class="controls">
       <input type="url" id="urlInput" placeholder="https://akshat-881236.github.io/">
@@ -264,27 +316,6 @@ iframe{display:none}
   <p><strong>Visit</strong> – Open link in new tab. Visual check for safety and content.</p>
   <p><strong>Preview</strong> – View snapshot preview. Click to load live site in safe container. If preview fails, site may block iframes or have CORS restrictions. Always use caution. In that case, click "Open in new tab" to inspect manually.</p>
   <p><strong>Copy</strong> – Copy normalized URL to clipboard for reference or manual inspection.</p>
-
-  <h2>How It Works</h2>
-  <p>Enter a GitHub Pages URL and select crawl depth. The tool fetches the page, extracts links, and classifies them as internal (same GitHub Pages domain) or external. It recursively crawls internal links up to the specified depth. Results are displayed in a table with actions for each link.</p>
-  <p><strong>Working Algorithm -</strong></p>
-  <ol>
-    <li><strong>Input URL:</strong> User enters a GitHub Pages URL and selects crawl depth.</li>
-    <li><strong>Fetch & Parse:</strong> The tool fetches the HTML content of the URL and parses it to extract all anchor tags.</li>
-    <li><strong>Normalize Links:</strong> Each extracted link is normalized to an absolute URL based on the base URL.</li>
-    <li><strong>Classify Links:</strong> Links are classified as internal (same GitHub Pages domain) or external (different domain).</li>
-    <li><strong>Recursive Crawling:</strong> Internal links are recursively crawled up to the specified depth, repeating steps 2-4 for each new page.</li>
-    <li><strong>Data Storage:</strong> All unique links are stored in a data structure with their URL, type, and associated repository.</li>
-    <li><strong>Render Results:</strong> The collected data is rendered in a table format with action buttons for visiting, previewing, or copying each link.</li>
-  </ol>
-  <p><strong>Note:</strong> Always exercise caution when visiting external links. Use the preview feature to get a snapshot of the site before visiting. If the preview fails, it may indicate that the site blocks iframes or has CORS restrictions, so it's safer to open it in a new tab for manual inspection.</p>
-
-  <h3>Disclaimer</h3>
-  <p>This tool is provided for educational purposes only. The creators are not responsible for any misuse or damage caused by using this tool. Always exercise caution when visiting external links. This tool does not guarantee the safety of any links. Use it at your own risk.</p>
-  <p>Also this project is open-source and free to use. If you find it useful, consider starring the repository on GitHub to support further development.</p>
-
-  <h3>About the Creator -</h3>
-  <p>Hey there! I'm <a href="https://akshat-881236.github.io/LocalRepo/" target="_blank" rel="noopener noreferrer">Akshat Prasad</a>, a passionate web developer and open-source enthusiast. I created this Link Inspection and Crawler Tool to help users quickly analyze my GitHub Pages sites and understand my projects link structure. With a focus on simplicity and efficiency, this tool is designed to provide valuable insights while being easy to use. If you have any feedback or suggestions for improvement, feel free to reach out or contribute to the project on GitHub!</p>
 </section>
 </main>
 
