@@ -270,92 +270,202 @@ iframe{display:none}
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
-const start=document.getElementById("start");
-const rows=document.getElementById("rows");
-const status=document.getElementById("status");
-const visited=new Set(),data=new Map();
+// ================= GLOBAL STATE =================
+let activeIframeRow = null;
 
-const norm=(u,b)=>{try{return new URL(u,b).href}catch{return null}};
-const isGH=u=>u.includes(".github.io");
-const repo=u=>{try{return new URL(u).pathname.split("/")[1]||"/"}catch{return"-"}};
+const start = document.getElementById("start");
+const rows = document.getElementById("rows");
+const status = document.getElementById("status");
 
-async function crawl(url,d,max,origin){
-  if(visited.has(url)||d>max)return;
+const visited = new Set();
+const data = new Map();
+
+// ================= HELPERS =================
+const norm = (u, b) => {
+  try { return new URL(u, b).href } catch { return null }
+};
+
+const isGH = u => u.includes(".github.io");
+
+const repo = u => {
+  try { return new URL(u).pathname.split("/")[1] || "/" }
+  catch { return "-" }
+};
+
+// ================= CRAWLER =================
+async function crawl(url, d, max, origin) {
+  if (visited.has(url) || d > max) return;
+
   visited.add(url);
-  status.textContent="Processing your URL : "+url;
-  let html="";
-  try{html=await (await fetch(url)).text()}catch{return}
-  const doc=new DOMParser().parseFromString(html,"text/html");
-  for(const a of doc.querySelectorAll("a[href]")){
-    const full=norm(a.getAttribute("href"),url);
-    if(!full||!full.startsWith(origin))continue;
-    if(!data.has(full))data.set(full,{url:full,type:isGH(full)?"Internal":"External",repo:repo(full)});
-    if(isGH(full))await crawl(full,d+1,max,origin);
+  status.textContent = "Processing your URL : " + url;
+
+  let html = "";
+  try {
+    html = await (await fetch(url)).text();
+  } catch {
+    return;
+  }
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  for (const a of doc.querySelectorAll("a[href]")) {
+    const full = norm(a.getAttribute("href"), url);
+
+    if (!full || !full.startsWith(origin)) continue;
+
+    if (!data.has(full)) {
+      data.set(full, {
+        url: full,
+        type: isGH(full) ? "Internal" : "External",
+        repo: repo(full)
+      });
+    }
+
+    if (isGH(full)) {
+      await crawl(full, d + 1, max, origin);
+    }
   }
 }
-  
-function render(){
-  rows.innerHTML="";
-  [...data.values()].sort((a,b)=>a.repo.localeCompare(b.repo)).forEach(i=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td data-label="URL">${i.url}</td>
-      <td data-label="Type"><span class="badge ${i.type==="Internal"?"internal":"external"}">${i.type}</span></td>
-      <td data-label="Repo">${i.repo}</td>
-      <td data-label="Actions">
-        <div class="actions">
-          <button onclick="window.open('${i.url}','_blank')">Visit</button>
-          <button data-view>View</button>
-          <button onclick="navigator.clipboard.writeText('${i.url}')">Copy</button>
-          <button data-src>View Source</button>
-        </div>
-      </td>`;
-    tr.querySelector("[data-view]").onclick = () => {
-  // prevent duplicate iframe rows
-  if (tr.nextSibling && tr.nextSibling.classList.contains("iframe-row")) return;
 
-  const r = document.createElement("tr");
-  r.className = "iframe-row";
+// ================= RENDER =================
+function render() {
+  rows.innerHTML = "";
 
-  const c = document.createElement("td");
-  c.colSpan = 4;
+  [...data.values()]
+    .sort((a, b) => a.repo.localeCompare(b.repo))
+    .forEach(i => {
 
-  const iframe = document.createElement("iframe");
-  iframe.src = i.url;
-  iframe.style.width = "100%";
-  iframe.style.height = "70vh";
-  iframe.style.border = "1px solid var(--border)";
-  iframe.style.borderRadius = "8px";
-  iframe.loading = "lazy";
+      const tr = document.createElement("tr");
 
-  c.appendChild(iframe);
-  r.appendChild(c);
-  tr.after(r);
-};
-    tr.querySelector("[data-src]").onclick=async()=>{
-      const w=window.open();
-      const h=await fetch(i.url).then(r=>r.text());
-      w.document.write(`<textarea style="width:100%;height:40%">${h.replace(/</g,"&lt;")}</textarea>
-      <iframe style="width:100%;height:55%"></iframe>
-      <script>
-        const t=document.querySelector('textarea'),i=document.querySelector('iframe');
-        t.oninput=()=>i.srcdoc=t.value;
-      <\/script>`);
-    };
-    rows.appendChild(tr);
-  });
+      tr.innerHTML = `
+        <td data-label="URL">${i.url}</td>
+        <td data-label="Type">
+          <span class="badge ${i.type === "Internal" ? "internal" : "external"}">
+            ${i.type}
+          </span>
+        </td>
+        <td data-label="Repo">${i.repo}</td>
+        <td data-label="Actions">
+          <div class="actions">
+            <button onclick="window.open('${i.url}','_blank')">Visit</button>
+            <button data-view>View</button>
+            <button onclick="navigator.clipboard.writeText('${i.url}')">Copy</button>
+            <button data-src>View Source</button>
+          </div>
+        </td>
+      `;
+
+      // ================= IFRAME LOGIC =================
+      tr.querySelector("[data-view]").onclick = () => {
+
+        // Toggle same row
+        if (tr.nextSibling && tr.nextSibling.classList.contains("iframe-row")) {
+          tr.nextSibling.remove();
+          activeIframeRow = null;
+          return;
+        }
+
+        // Remove previous iframe
+        if (activeIframeRow) {
+          activeIframeRow.remove();
+          activeIframeRow = null;
+        }
+
+        const r = document.createElement("tr");
+        r.className = "iframe-row";
+
+        const c = document.createElement("td");
+        c.colSpan = 4;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = i.url;
+        iframe.style.width = "100%";
+        iframe.style.height = "70vh";
+        iframe.style.border = "1px solid var(--border)";
+        iframe.style.borderRadius = "8px";
+        iframe.loading = "lazy";
+
+        c.appendChild(iframe);
+        r.appendChild(c);
+        tr.after(r);
+
+        activeIframeRow = r;
+
+        // optional smooth scroll
+        r.scrollIntoView({ behavior: "smooth", block: "center" });
+      };
+
+      // ================= VIEW SOURCE =================
+      tr.querySelector("[data-src]").onclick = async () => {
+        const w = window.open();
+
+        const h = await fetch(i.url).then(r => r.text());
+
+        w.document.write(`
+          <textarea style="width:100%;height:40%">${h.replace(/</g,"&lt;")}</textarea>
+          <iframe style="width:100%;height:55%"></iframe>
+
+          <script>
+            const t = document.querySelector('textarea');
+            const i = document.querySelector('iframe');
+            t.oninput = () => i.srcdoc = t.value;
+          <\/script>
+        `);
+      };
+
+      rows.appendChild(tr);
+    });
 }
 
-start.onclick=async()=>{
-  const url=document.getElementById("urlInput").value.trim();
-  if(!url)return;
-  start.disabled=true;
-  rows.innerHTML="";visited.clear();data.clear();
-  await crawl(url,0,Number(document.getElementById("depth").value),new URL(url).origin);
+// ================= START BUTTON =================
+start.onclick = async () => {
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) return;
+
+  start.disabled = true;
+
+  rows.innerHTML = "";
+  visited.clear();
+  data.clear();
+
+  await crawl(
+    url,
+    0,
+    Number(document.getElementById("depth").value),
+    new URL(url).origin
+  );
+
   render();
-  status.textContent="Crawling completed successfully ✔️";
-  start.disabled=false;
+
+  status.textContent = "Crawling completed successfully ✔️";
+  start.disabled = false;
+
+  // ================= UPDATE URL PARAM =================
+  const depthVal = document.getElementById("depth").value;
+  history.replaceState(null, "", `?url=${encodeURIComponent(url)}&depth=${depthVal}`);
 };
+
+// ================= URL PARAM AUTO LOAD =================
+function loadFromParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  const url = params.get("url");
+  const depthVal = params.get("depth");
+
+  if (url) {
+    document.getElementById("urlInput").value = url;
+  }
+
+  if (depthVal) {
+    document.getElementById("depth").value = depthVal;
+  }
+
+  if (url) {
+    start.click(); // auto run
+  }
+}
+
+window.addEventListener("load", loadFromParams);
 </script>
 </body>
 </html>
