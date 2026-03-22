@@ -261,10 +261,30 @@ iframe{display:none}
 
 <section id="manual" class="card">
   <h2>Site Manual</h2>
-  <p><strong>Visit</strong> – Open link in new tab</p>
-  <p><strong>View</strong> – Capture 4 snapshots over 12 seconds</p>
-  <p><strong>Copy</strong> – Copy normalized URL</p>
-  <p><strong>View Source</strong> – Safe edit & preview (no live impact)</p>
+  <p><strong>Visit</strong> – Open link in new tab. Visual check for safety and content.</p>
+  <p><strong>Preview</strong> – View snapshot preview. Click to load live site in safe container. If preview fails, site may block iframes or have CORS restrictions. Always use caution. In that case, click "Open in new tab" to inspect manually.</p>
+  <p><strong>Copy</strong> – Copy normalized URL to clipboard for reference or manual inspection.</p>
+
+  <h2>How It Works</h2>
+  <p>Enter a GitHub Pages URL and select crawl depth. The tool fetches the page, extracts links, and classifies them as internal (same GitHub Pages domain) or external. It recursively crawls internal links up to the specified depth. Results are displayed in a table with actions for each link.</p>
+  <p><strong>Working Algorithm -</strong></p>
+  <ol>
+    <li><strong>Input URL:</strong> User enters a GitHub Pages URL and selects crawl depth.</li>
+    <li><strong>Fetch & Parse:</strong> The tool fetches the HTML content of the URL and parses it to extract all anchor tags.</li>
+    <li><strong>Normalize Links:</strong> Each extracted link is normalized to an absolute URL based on the base URL.</li>
+    <li><strong>Classify Links:</strong> Links are classified as internal (same GitHub Pages domain) or external (different domain).</li>
+    <li><strong>Recursive Crawling:</strong> Internal links are recursively crawled up to the specified depth, repeating steps 2-4 for each new page.</li>
+    <li><strong>Data Storage:</strong> All unique links are stored in a data structure with their URL, type, and associated repository.</li>
+    <li><strong>Render Results:</strong> The collected data is rendered in a table format with action buttons for visiting, previewing, or copying each link.</li>
+  </ol>
+  <p><strong>Note:</strong> Always exercise caution when visiting external links. Use the preview feature to get a snapshot of the site before visiting. If the preview fails, it may indicate that the site blocks iframes or has CORS restrictions, so it's safer to open it in a new tab for manual inspection.</p>
+
+  <h3>Disclaimer</h3>
+  <p>This tool is provided for educational purposes only. The creators are not responsible for any misuse or damage caused by using this tool. Always exercise caution when visiting external links. This tool does not guarantee the safety of any links. Use it at your own risk.</p>
+  <p>Also this project is open-source and free to use. If you find it useful, consider starring the repository on GitHub to support further development.</p>
+
+  <h3>About the Creator -</h3>
+  <p>Hey there! I'm <a href="https://akshat-881236.github.io/LocalRepo/" target="_blank" rel="noopener noreferrer">Akshat Prasad</a>, a passionate web developer and open-source enthusiast. I created this Link Inspection and Crawler Tool to help users quickly analyze my GitHub Pages sites and understand my projects link structure. With a focus on simplicity and efficiency, this tool is designed to provide valuable insights while being easy to use. If you have any feedback or suggestions for improvement, feel free to reach out or contribute to the project on GitHub!</p>
 </section>
 </main>
 
@@ -290,6 +310,11 @@ const isGH = u => u.includes(".github.io");
 const repo = u => {
   try { return new URL(u).pathname.split("/")[1] || "/" }
   catch { return "-" }
+};
+
+// 🔥 Thumbnail generator (FREE service)
+const getPreviewImage = (url) => {
+  return `https://image.thum.io/get/width/800/crop/600/noanimate/${encodeURIComponent(url)}`;
 };
 
 // ================= CRAWLER =================
@@ -348,76 +373,125 @@ function render() {
         <td data-label="Actions">
           <div class="actions">
             <button onclick="window.open('${i.url}','_blank')">Visit</button>
-            <button data-view>View</button>
+            <button data-view>Preview</button>
             <button onclick="navigator.clipboard.writeText('${i.url}')">Copy</button>
-            <button data-src>View Source</button>
           </div>
         </td>
       `;
 
-      // ================= IFRAME LOGIC =================
-      tr.querySelector("[data-view]").onclick = () => {
+      // ================= IMAGE → IFRAME (FIXED) =================
+tr.querySelector("[data-view]").onclick = () => {
 
-        // Toggle same row
-        if (tr.nextSibling && tr.nextSibling.classList.contains("iframe-row")) {
-          tr.nextSibling.remove();
-          activeIframeRow = null;
-          return;
+  if (tr.nextSibling && tr.nextSibling.classList.contains("iframe-row")) {
+    tr.nextSibling.remove();
+    activeIframeRow = null;
+    return;
+  }
+
+  if (activeIframeRow) {
+    activeIframeRow.remove();
+    activeIframeRow = null;
+  }
+
+  const r = document.createElement("tr");
+  r.className = "iframe-row";
+
+  const c = document.createElement("td");
+  c.colSpan = 4;
+
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "relative";
+  wrapper.style.height = "70vh";
+  wrapper.style.display = "flex";
+  wrapper.style.alignItems = "center";
+  wrapper.style.justifyContent = "center";
+  wrapper.style.background = "#111";
+  wrapper.style.borderRadius = "8px";
+  wrapper.style.border = "1px solid var(--border)";
+  wrapper.style.cursor = "pointer";
+
+  // ✅ IMAGE
+  const img = document.createElement("img");
+  img.src = `https://image.thum.io/get/width/800/${encodeURIComponent(i.url)}`;
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+  img.style.borderRadius = "8px";
+
+  // ❌ IMAGE FAIL → fallback
+  img.onerror = () => {
+    wrapper.innerHTML = `
+      <div style="color:white;text-align:center">
+        ⚠️ Preview not available<br><br>
+        👉 Click to open site
+      </div>
+    `;
+  };
+
+  // ▶ overlay
+  const overlay = document.createElement("div");
+  overlay.innerHTML = "▶ Click to Load";
+  overlay.style.position = "absolute";
+  overlay.style.background = "rgba(0,0,0,0.6)";
+  overlay.style.color = "white";
+  overlay.style.padding = "10px 20px";
+  overlay.style.borderRadius = "6px";
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(overlay);
+
+  c.appendChild(wrapper);
+  r.appendChild(c);
+  tr.after(r);
+
+  activeIframeRow = r;
+
+  // ================= CLICK LOAD =================
+  wrapper.onclick = () => {
+
+    const iframe = document.createElement("iframe");
+
+    iframe.src = i.url;
+    iframe.style.width = "100%";
+    iframe.style.height = "70vh";
+    iframe.style.border = "none";
+    iframe.style.borderRadius = "8px";
+
+    // ⛔ detect blocked iframe
+    setTimeout(() => {
+      try {
+        if (!iframe.contentDocument || iframe.contentDocument.body.innerHTML === "") {
+          c.innerHTML = `
+            <div style="color:white;padding:20px;text-align:center">
+              ⚠️ Site blocked iframe preview<br><br>
+              👉 <a href="${i.url}" target="_blank" style="color:#38bdf8">
+              Open in new tab
+              </a>
+            </div>
+          `;
         }
+      } catch {
+        c.innerHTML = `
+          <div style="color:white;padding:20px;text-align:center">
+            ⚠️ Cross-origin blocked<br><br>
+            👉 <a href="${i.url}" target="_blank" style="color:#38bdf8">
+            Open manually
+            </a>
+          </div>
+        `;
+      }
+    }, 2000);
 
-        // Remove previous iframe
-        if (activeIframeRow) {
-          activeIframeRow.remove();
-          activeIframeRow = null;
-        }
-
-        const r = document.createElement("tr");
-        r.className = "iframe-row";
-
-        const c = document.createElement("td");
-        c.colSpan = 4;
-
-        const iframe = document.createElement("iframe");
-        iframe.src = i.url;
-        iframe.style.width = "100%";
-        iframe.style.height = "70vh";
-        iframe.style.border = "1px solid var(--border)";
-        iframe.style.borderRadius = "8px";
-        iframe.loading = "lazy";
-
-        c.appendChild(iframe);
-        r.appendChild(c);
-        tr.after(r);
-
-        activeIframeRow = r;
-
-        // optional smooth scroll
-        r.scrollIntoView({ behavior: "smooth", block: "center" });
-      };
-
-      // ================= VIEW SOURCE =================
-      tr.querySelector("[data-src]").onclick = async () => {
-        const w = window.open();
-
-        const h = await fetch(i.url).then(r => r.text());
-
-        w.document.write(`
-          <textarea style="width:100%;height:40%">${h.replace(/</g,"&lt;")}</textarea>
-          <iframe style="width:100%;height:55%"></iframe>
-
-          <script>
-            const t = document.querySelector('textarea');
-            const i = document.querySelector('iframe');
-            t.oninput = () => i.srcdoc = t.value;
-          <\/script>
-        `);
-      };
+    c.innerHTML = "";
+    c.appendChild(iframe);
+  };
+};
 
       rows.appendChild(tr);
     });
 }
 
-// ================= START BUTTON =================
+// ================= START =================
 start.onclick = async () => {
   const url = document.getElementById("urlInput").value.trim();
   if (!url) return;
@@ -440,29 +514,21 @@ start.onclick = async () => {
   status.textContent = "Crawling completed successfully ✔️";
   start.disabled = false;
 
-  // ================= UPDATE URL PARAM =================
   const depthVal = document.getElementById("depth").value;
   history.replaceState(null, "", `?url=${encodeURIComponent(url)}&depth=${depthVal}`);
 };
 
-// ================= URL PARAM AUTO LOAD =================
+// ================= AUTO LOAD =================
 function loadFromParams() {
   const params = new URLSearchParams(window.location.search);
 
   const url = params.get("url");
   const depthVal = params.get("depth");
 
-  if (url) {
-    document.getElementById("urlInput").value = url;
-  }
+  if (url) document.getElementById("urlInput").value = url;
+  if (depthVal) document.getElementById("depth").value = depthVal;
 
-  if (depthVal) {
-    document.getElementById("depth").value = depthVal;
-  }
-
-  if (url) {
-    start.click(); // auto run
-  }
+  if (url) start.click();
 }
 
 window.addEventListener("load", loadFromParams);
